@@ -1,0 +1,13 @@
+{
+  "name": "ayo-menulis",
+  "version": "1.0.0",
+  "description": "Aplikasi latihan menulis kelas 1 SD dengan teks dari Gemini",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

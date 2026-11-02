@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ayo Menulis!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --langit: #dff3ff;
+    --kertas: #fffef5;
+    --garis: #b9dcf5;
+    --pensil: #ffc93c;
+    --pensil-tua: #e8a700;
+    --merah: #f25c54;
+    --hijau: #2fb36d;
+    --hijau-tua: #1f8f53;
+    --biru: #3a8fe0;
+    --tinta: #1e2a4a;
+    --tinta-lembut: #5a6785;
+    --font: "Fredoka", "Baloo 2", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--tinta);
+    background:
+      radial-gradient(circle at 12% 8%, #ffffff 0 5%, transparent 5.2%),
+      radial-gradient(circle at 18% 10%, #ffffff 0 4%, transparent 4.2%),
+      radial-gradient(circle at 86% 14%, #ffffff 0 6%, transparent 6.2%),
+      radial-gradient(circle at 92% 17%, #ffffff 0 4%, transparent 4.2%),
+      var(--langit);
+    padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  }
+  .wadah { max-width: 980px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 18px; }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 7vw, 4rem);
+    font-weight: 700;
+    color: var(--tinta);
+    letter-spacing: .5px;
+    display: inline-flex; align-items: center; gap: .3em;
+  }
+  h1 .pensil { width: 1.1em; height: 1.1em; transform: rotate(-12deg); }
+  header p { margin: 4px 0 0; font-size: clamp(1.1rem, 3.2vw, 1.5rem); color: var(--tinta-lembut); }
+
+  /* Pilihan tema */
+  .tema { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 18px 0 16px; }
+  .tema button {
+    font: inherit; font-weight: 600;
+    font-size: clamp(1.05rem, 3vw, 1.35rem);
+    padding: 10px 18px;
+    border: 3px solid var(--tinta);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--tinta);
+    cursor: pointer;
+    min-height: 52px;
+    transition: transform .12s, background .12s;
+  }
+  .tema button:hover { transform: translateY(-2px); }
+  .tema button[aria-pressed="true"] { background: var(--pensil); box-shadow: 0 4px 0 var(--tinta); transform: translateY(-3px); }
+  .tema .tambah-tema { border-style: dashed; background: #f5fbff; }
+
+  /* Jumlah baris & kata */
+  .pengaturan {
+    display: flex; flex-wrap: wrap; gap: 12px 20px; justify-content: center; align-items: center;
+    margin: 0 0 16px;
+    font-size: clamp(1rem, 2.8vw, 1.2rem); font-weight: 600;
+  }
+  .pengaturan label { display: inline-flex; align-items: center; gap: 8px; }
+  .pengaturan select {
+    font: inherit; font-weight: 700; color: var(--tinta);
+    background: #fff; border: 3px solid var(--tinta); border-radius: 999px;
+    padding: 6px 14px; min-height: 48px; cursor: pointer;
+  }
+
+  /* Saklar suara */
+  .saklar { position: relative; cursor: pointer; user-select: none; }
+  .saklar input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .saklar .jalur {
+    flex: none; width: 66px; height: 38px; border: 3px solid var(--tinta); border-radius: 999px;
+    background: #e7eef7; position: relative; transition: background .15s;
+  }
+  .saklar .kenop {
+    position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--tinta); transition: transform .15s;
+  }
+  .saklar input:checked + .jalur { background: var(--hijau); }
+  .saklar input:checked + .jalur .kenop { transform: translateX(28px); }
+  .saklar input:focus-visible + .jalur { outline: 4px solid var(--merah); outline-offset: 3px; }
+
+  /* Buku tulis */
+  .buku {
+    position: relative;
+    background: var(--kertas);
+    border: 4px solid var(--tinta);
+    border-radius: 22px;
+    box-shadow: 0 8px 0 var(--tinta);
+    padding: 20px 16px 20px 64px;
+    min-height: 320px;
+    overflow: hidden;
+    background-image: linear-gradient(var(--kertas) 0 0);
+  }
+  .buku::before { /* garis margin merah */
+    content: ""; position: absolute; top: 0; bottom: 0; left: 46px; width: 3px; background: var(--merah); opacity: .75;
+  }
+  .buku::after { /* lubang buku */
+    content: ""; position: absolute; left: 14px; top: 28px; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--langit); border: 3px solid var(--tinta);
+    box-shadow: 0 90px 0 -3px var(--langit), 0 90px 0 0 var(--tinta), 0 180px 0 -3px var(--langit), 0 180px 0 0 var(--tinta);
+  }
+  .baris {
+    font-size: clamp(2rem, 6.4vw, 3.6rem);
+    font-weight: 500;
+    line-height: 1.25;
+    padding: .22em 0 .12em;
+    border-bottom: 3px dashed var(--garis);
+    color: var(--tinta);
+    word-break: break-word;
+    animation: muncul .35s ease both;
+  }
+  .baris:last-child { border-bottom-color: transparent; }
+  .baris .kata {
+    font: inherit; color: inherit; background: none; border: 0; padding: 0 .04em;
+    border-radius: 10px; cursor: pointer;
+  }
+  .baris .kata:hover, .baris .kata:focus-visible { background: #fff3bf; }
+  .baris .kata:active { background: var(--pensil); }
+  @keyframes muncul { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+
+  .kosong, .memuat {
+    text-align: center;
+    font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+    color: var(--tinta-lembut);
+    padding: 60px 10px;
+  }
+  .memuat .titik span { display: inline-block; animation: loncat .9s infinite; }
+  .memuat .titik span:nth-child(2) { animation-delay: .15s; }
+  .memuat .titik span:nth-child(3) { animation-delay: .3s; }
+  @keyframes loncat { 50% { transform: translateY(-10px); } }
+
+  .status {
+    min-height: 1.6em;
+    text-align: center;
+    margin: 14px 0 4px;
+    font-size: clamp(1.05rem, 3vw, 1.35rem);
+    font-weight: 600;
+    color: var(--tinta-lembut);
+  }
+  .status.ok { color: var(--hijau-tua); }
+  .status.salah { color: #b3372f; }
+
+  /* Tombol aksi */
+  .aksi { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 10px; }
+  .tombol {
+    font: inherit; font-weight: 700;
+    font-size: clamp(1.15rem, 3.6vw, 1.6rem);
+    padding: 14px 26px;
+    min-height: 60px;
+    border-radius: 18px;
+    border: 3px solid var(--tinta);
+    color: var(--tinta);
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 5px 0 var(--tinta);
+    transition: transform .1s, box-shadow .1s;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .tombol:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--tinta); }
+  .tombol[disabled] { opacity: .5; cursor: not-allowed; }
+  .tombol.baru { background: var(--biru); color: #fff; }
+  .tombol.simpan { background: var(--hijau); color: #fff; }
+  .tombol.dengar { background: var(--pensil); }
+  .tombol svg { width: 1.3em; height: 1.3em; flex: none; }
+  :focus-visible { outline: 4px solid var(--merah); outline-offset: 3px; }
+
+  /* Daftar tersimpan */
+  .tersimpan { margin-top: 0; }
+  .kartu-simpan {
+    display: flex; gap: 10px; align-items: stretch;
+    background: #fff;
+    border: 3px solid var(--tinta);
+    border-radius: 18px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .kartu-simpan .isi {
+    flex: 1; text-align: left; font: inherit; border: 0; background: transparent; cursor: pointer;
+    padding: 12px 16px; color: var(--tinta);
+  }
+  .kartu-simpan .isi:hover { background: #fff8dc; }
+  .kartu-simpan .judul { font-size: clamp(1.1rem, 3.4vw, 1.5rem); font-weight: 700; }
+  .kartu-simpan .cuplikan { font-size: clamp(1rem, 3vw, 1.25rem); color: var(--tinta-lembut); margin-top: 2px; }
+  .kartu-simpan .hapus {
+    font: inherit; font-weight: 600; font-size: 1.05rem;
+    border: 0; border-left: 3px solid var(--tinta); background: #ffe3e0; color: #b3372f; padding: 0 16px; cursor: pointer;
+    min-width: 76px;
+  }
+  .kartu-simpan.aktif { background: #eafaf1; }
+
+  footer { text-align: center; margin-top: 28px; color: var(--tinta-lembut); font-size: 1rem; }
+
+  /* Tombol menu + popup pengaturan */
+  .menu {
+    position: fixed; top: max(12px, env(safe-area-inset-top)); right: 16px; z-index: 10;
+    font: inherit; font-weight: 700; font-size: 1.1rem;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; min-height: 52px;
+    background: #fff; color: var(--tinta);
+    border: 3px solid var(--tinta); border-radius: 999px;
+    box-shadow: 0 4px 0 var(--tinta); cursor: pointer;
+  }
+  .menu:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--tinta); }
+  .menu svg { width: 1.3em; height: 1.3em; flex: none; }
+
+  .menu-popup {
+    width: min(640px, calc(100% - 24px));
+    max-height: 85vh; overflow: auto; overscroll-behavior: contain;
+    margin: 6vh auto auto;
+    padding: 18px 20px 24px;
+    background: var(--kertas); color: var(--tinta);
+    border: 4px solid var(--tinta); border-radius: 22px;
+    box-shadow: 0 10px 0 var(--tinta);
+  }
+  .menu-popup::backdrop { background: rgba(30, 42, 74, .45); }
+  .kepala-menu { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .kepala-menu h2 { margin: 0; font-size: clamp(1.5rem, 4.5vw, 1.9rem); }
+  .kepala-menu .tutup {
+    font: inherit; font-weight: 700; font-size: 1.3rem; line-height: 1;
+    width: 48px; height: 48px; flex: none; border-radius: 50%;
+    border: 3px solid var(--tinta); background: #fff; color: var(--tinta); cursor: pointer;
+  }
+  .menu-popup h3 { margin: 20px 0 10px; font-size: clamp(1.1rem, 3.2vw, 1.3rem); color: var(--tinta-lembut); }
+  .menu-popup .tema { margin: 0 0 4px; }
+  .menu-popup .pengaturan { margin: 0; justify-content: flex-start; }
+  .menu-popup .aksi { margin-top: 18px; justify-content: flex-start; }
+
+  @media (max-width: 520px) {
+    body { padding-top: max(76px, env(safe-area-inset-top)); }
+    .buku { padding-left: 54px; padding-right: 12px; }
+    .buku::before { left: 38px; }
+    .buku::after { left: 8px; }
+    .tombol { width: 100%; justify-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wadah">
+  <header>
+    <h1>
+      <svg class="pensil" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M10 54l4-14L42 12l10 10-28 28z" fill="#ffc93c" stroke="#1e2a4a" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M10 54l4-14 10 10z" fill="#fde6c4" stroke="#1e2a4a" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M42 12l5-5a4 4 0 0 1 6 0l4 4a4 4 0 0 1 0 6l-5 5z" fill="#f25c54" stroke="#1e2a4a" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+      Ayo Menulis!
+    </h1>
+    <p>Baca dulu, lalu tulis lagi di bukumu.</p>
+  </header>
+
+  <button class="menu" id="btnMenu" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+    Menu
+  </button>
+
+  <main>
+    <div class="buku" id="buku" aria-live="polite"></div>
+    <div class="status" id="status" role="status"></div>
+
+    <div class="aksi">
+      <button class="tombol dengar" id="btnDengar" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M16 8a5 5 0 0 1 0 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        Dengarkan
+      </button>
+      <button class="tombol simpan" id="btnSimpan" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+        Simpan
+      </button>
+      <button class="tombol" id="btnLayar" aria-pressed="false">
+        <svg class="ikon-masuk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        <svg class="ikon-keluar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+        <span class="label">Layar Penuh</span>
+      </button>
+    </div>
+  </main>
+
+  <footer>Untuk latihan menulis kelas 1 SD</footer>
+</div>
+
+<dialog id="menu" class="menu-popup" aria-labelledby="judulMenu">
+  <form method="dialog" class="kepala-menu">
+    <h2 id="judulMenu">Pengaturan</h2>
+    <button class="tutup" aria-label="Tutup menu">✕</button>
+  </form>
+
+  <h3>Tema cerita</h3>
+  <div class="tema" id="tema" role="group" aria-label="Pilih tema cerita"></div>
+
+  <h3>Jumlah baris &amp; kata</h3>
+  <div class="pengaturan">
+    <label>Baris
+      <select id="pilihBaris" aria-label="Jumlah baris"></select>
+    </label>
+    <label>Kata per baris
+      <select id="pilihKata" aria-label="Jumlah kata per baris"><option value="">Auto</option></select>
+    </label>
+  </div>
+
+  <h3>Suara</h3>
+  <div class="pengaturan">
+    <label class="saklar">
+      <input type="checkbox" id="toggleSuara" role="switch" checked>
+      <span class="jalur" aria-hidden="true"><span class="kenop"></span></span>
+      Bacakan kata (TTS)
+    </label>
+  </div>
+
+  <div class="aksi">
+    <button class="tombol baru" id="btnBaru">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>
+      Buat Teks Baru
+    </button>
+  </div>
+
+  <section class="tersimpan" id="bagianSimpan" hidden>
+    <h3>Teks yang disimpan</h3>
+    <div id="daftar"></div>
+  </section>
+</dialog>
+
+<script>
+let daftarTema = [];
+
+/* ---------- Elemen ---------- */
+const $ = (id) => document.getElementById(id);
+const elTema = $("tema"), elBuku = $("buku"), elStatus = $("status");
+const btnBaru = $("btnBaru"), btnSimpan = $("btnSimpan"), btnDengar = $("btnDengar"), btnLayar = $("btnLayar");
+const pilihBaris = $("pilihBaris"), pilihKata = $("pilihKata"), toggleSuara = $("toggleSuara");
+const elDaftar = $("daftar"), elBagian = $("bagianSimpan");
+const elMenu = $("menu"), btnMenu = $("btnMenu");
+
+/* ---------- API ke server ---------- */
+async function api(metode, url, body) {
+  const res = await fetch(url, {
+    method: metode,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Terjadi kesalahan");
+  return data;
+}
+
+/* ---------- State ---------- */
+let temaDipilih = "";
+let barisSekarang = [];      // teks yang sedang tampil
+let sudahDisimpan = false;   // apakah teks yang tampil sudah ada di daftar simpan
+let daftarSimpan = [];
+let suaraAktif = true;
+try { suaraAktif = localStorage.getItem("suara") !== "0"; } catch {}
+
+/* ---------- Tampilan ---------- */
+function isiPilihan(select, min, maks, bawaan) {
+  for (let i = min; i <= maks; i++) {
+    const opsi = document.createElement("option");
+    opsi.value = opsi.textContent = i;
+    select.appendChild(opsi);
+  }
+  select.value = bawaan;
+}
+
+function buatTombolTema() {
+  elTema.innerHTML = "";
+  daftarTema.forEach((t) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = t.label;
+    b.setAttribute("aria-pressed", String(t.id === temaDipilih));
+    b.addEventListener("click", () => {
+      temaDipilih = t.id;
+      buatTombolTema();
+    });
+    elTema.appendChild(b);
+  });
+
+  const tambah = document.createElement("button");
+  tambah.type = "button";
+  tambah.className = "tambah-tema";
+  tambah.textContent = "➕ Tambah tema";
+  tambah.addEventListener("click", async () => {
+    const label = prompt("Nama tema baru (boleh pakai emoji), contoh: 🦕 Dinosaurus");
+    if (!label || !label.trim()) return;
+    try {
+      const data = await api("POST", "/api/tema", { label: label.trim() });
+      daftarTema = data.tema;
+      temaDipilih = data.baru.id;
+      buatTombolTema();
+    } catch (e) {
+      console.warn(e);
+      alert("Tema belum bisa ditambahkan. Coba lagi ya.");
+    }
+  });
+  elTema.appendChild(tambah);
+}
+
+function setStatus(pesan, jenis) {
+  elStatus.textContent = pesan || "";
+  elStatus.className = "status" + (jenis ? " " + jenis : "");
+}
+
+function tampilKosong() {
+  elBuku.innerHTML = '<div class="kosong">Tekan tombol “Menu”, lalu<br>“Buat Teks Baru” ya! ✏️</div>';
+}
+
+function tampilMemuat() {
+  elBuku.innerHTML = '<div class="memuat">Sedang menyiapkan teks<span class="titik"><span>.</span><span>.</span><span>.</span></span></div>';
+}
+
+function tampilTeks(baris) {
+  elBuku.innerHTML = "";
+  baris.forEach((b, i) => {
+    const d = document.createElement("div");
+    d.className = "baris";
+    d.style.animationDelay = (i * 0.08) + "s";
+    b.split(/\s+/).filter(Boolean).forEach((kata, j) => {
+      if (j) d.append(" ");
+      const tombol = document.createElement("button");
+      tombol.type = "button";
+      tombol.className = "kata";
+      tombol.textContent = kata;
+      tombol.addEventListener("click", () => ucapkan(kata));
+      d.appendChild(tombol);
+    });
+    elBuku.appendChild(d);
+  });
+}
+
+function adaDiDaftar(baris) {
+  const kunci = baris.join("\n");
+  return daftarSimpan.some((s) => s.baris.join("\n") === kunci);
+}
+
+function perbaruiTombol() {
+  const ada = barisSekarang.length > 0;
+  btnDengar.disabled = !ada || !suaraAktif;
+  btnSimpan.hidden = !ada || sudahDisimpan;
+}
+
+function gambarDaftar() {
+  elBagian.hidden = daftarSimpan.length === 0;
+  elDaftar.innerHTML = "";
+  const kunciAktif = barisSekarang.join("\n");
+  daftarSimpan.forEach((s) => {
+    const kartu = document.createElement("div");
+    kartu.className = "kartu-simpan" + (s.baris.join("\n") === kunciAktif ? " aktif" : "");
+
+    const buka = document.createElement("button");
+    buka.type = "button";
+    buka.className = "isi";
+    const label = (daftarTema.find((t) => t.id === s.tema) || {}).label || s.tema;
+    buka.innerHTML = '<div class="judul"></div><div class="cuplikan"></div>';
+    buka.querySelector(".judul").textContent = label;
+    buka.querySelector(".cuplikan").textContent = s.baris[0] || "";
+    buka.addEventListener("click", async () => {
+      barisSekarang = s.baris.slice();
+      temaDipilih = s.tema;
+      sudahDisimpan = true;
+      tampilTeks(barisSekarang);
+      setStatus("Teks dibuka. Ayo menulis!", "ok");
+      buatTombolTema();
+      perbaruiTombol();
+      gambarDaftar();
+      elMenu.close();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      try { await api("POST", "/api/current", { tema: s.tema, baris: s.baris }); } catch (e) { console.warn(e); }
+    });
+
+    const hapus = document.createElement("button");
+    hapus.type = "button";
+    hapus.className = "hapus";
+    hapus.textContent = "Hapus";
+    hapus.setAttribute("aria-label", "Hapus teks tersimpan");
+    hapus.addEventListener("click", async () => {
+      if (!confirm("Hapus teks ini?")) return;
+      try {
+        const data = await api("DELETE", "/api/saved/" + s.id);
+        daftarSimpan = data.saved;
+        sudahDisimpan = adaDiDaftar(barisSekarang);
+        perbaruiTombol();
+        gambarDaftar();
+      } catch (e) {
+        setStatus("Maaf, teks belum bisa dihapus.", "salah");
+      }
+    });
+
+    kartu.append(buka, hapus);
+    elDaftar.appendChild(kartu);
+  });
+}
+
+/* ---------- Aksi ---------- */
+async function buatBaru() {
+  btnBaru.disabled = true;
+  btnSimpan.hidden = true;
+  btnDengar.disabled = true;
+  setStatus("");
+  tampilMemuat();
+  window.speechSynthesis && window.speechSynthesis.cancel();
+
+  try {
+    const hasil = await api("POST", "/api/generate", {
+      tema: temaDipilih,
+      baris: Number(pilihBaris.value),
+      kata: Number(pilihKata.value)
+    });
+    barisSekarang = hasil.baris;
+    sudahDisimpan = adaDiDaftar(barisSekarang);
+    tampilTeks(barisSekarang);
+    if (hasil.cadangan) {
+      setStatus("AI sedang tidak bisa dihubungi. Ini teks cadangan.", "salah");
+    } else {
+      setStatus("Teks sudah siap. Ketuk kata untuk mendengar, lalu tulis di bukumu ya!", "ok");
+    }
+  } catch (err) {
+    console.error(err);
+    if (barisSekarang.length) tampilTeks(barisSekarang); else tampilKosong();
+    setStatus("Server tidak bisa dihubungi. Coba lagi ya.", "salah");
+  }
+  btnBaru.disabled = false;
+  perbaruiTombol();
+  gambarDaftar();
+}
+
+async function simpan() {
+  if (!barisSekarang.length || sudahDisimpan) return;
+  btnSimpan.disabled = true;
+  try {
+    const data = await api("POST", "/api/saved", { tema: temaDipilih, baris: barisSekarang });
+    daftarSimpan = data.saved;
+    sudahDisimpan = true;
+    setStatus("Hore! Teks sudah disimpan. ⭐", "ok");
+  } catch (e) {
+    console.error(e);
+    setStatus("Maaf, teks belum bisa disimpan.", "salah");
+  }
+  btnSimpan.disabled = false;
+  perbaruiTombol();
+  gambarDaftar();
+}
+
+/* ---------- Suara ---------- */
+function buatUcapan(teks) {
+  const u = new SpeechSynthesisUtterance(teks);
+  u.lang = "id-ID";
+  u.rate = 0.7;
+  u.pitch = 1.1;
+  return u;
+}
+
+function ucapkan(kata) {
+  if (!suaraAktif) {
+    setStatus("Suara sedang dimatikan. Nyalakan di menu “Pengaturan” ya.");
+    return;
+  }
+  if (!("speechSynthesis" in window)) {
+    setStatus("Peramban ini belum bisa membacakan teks.", "salah");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(buatUcapan(kata));
+}
+
+function dengarkan() {
+  if (!suaraAktif) return;
+  if (!("speechSynthesis" in window) || !barisSekarang.length) {
+    setStatus("Peramban ini belum bisa membacakan teks.", "salah");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  barisSekarang.forEach((b) => window.speechSynthesis.speak(buatUcapan(b)));
+}
+
+function terapkanSuara() {
+  toggleSuara.checked = suaraAktif;
+  if (!suaraAktif && "speechSynthesis" in window) window.speechSynthesis.cancel();
+  perbaruiTombol();
+}
+
+toggleSuara.addEventListener("change", () => {
+  suaraAktif = toggleSuara.checked;
+  try { localStorage.setItem("suara", suaraAktif ? "1" : "0"); } catch {}
+  terapkanSuara();
+});
+
+/* ---------- Layar penuh ---------- */
+function perbaruiLayar() {
+  const penuh = !!document.fullscreenElement;
+  btnLayar.setAttribute("aria-pressed", String(penuh));
+  btnLayar.querySelector(".label").textContent = penuh ? "Keluar Layar Penuh" : "Layar Penuh";
+  btnLayar.querySelector(".ikon-masuk").hidden = penuh;
+  btnLayar.querySelector(".ikon-keluar").hidden = !penuh;
+}
+
+async function alihkanLayar() {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+    } else {
+      setStatus("Peramban ini belum bisa layar penuh.", "salah");
+    }
+  } catch (e) {
+    setStatus("Layar penuh tidak bisa dibuka.", "salah");
+  }
+  perbaruiLayar();
+}
+
+btnBaru.addEventListener("click", () => {
+  elMenu.close();
+  buatBaru();
+});
+btnSimpan.addEventListener("click", simpan);
+btnDengar.addEventListener("click", dengarkan);
+btnLayar.addEventListener("click", alihkanLayar);
+document.addEventListener("fullscreenchange", perbaruiLayar);
+
+/* ---------- Popup pengaturan ---------- */
+btnMenu.addEventListener("click", () => elMenu.showModal());
+
+elMenu.addEventListener("click", (e) => {
+  const r = elMenu.getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+    elMenu.close();
+  }
+});
+
+/* ---------- Mulai: pulihkan data dari server setelah halaman dimuat ---------- */
+(async function mulai() {
+  isiPilihan(pilihBaris, 1, 8, 4);
+  isiPilihan(pilihKata, 2, 8, "");
+  terapkanSuara();
+  buatTombolTema();
+  try {
+    const data = await api("GET", "/api/state");
+    daftarTema = data.tema || [];
+    daftarSimpan = data.saved || [];
+    if (daftarTema.length) temaDipilih = daftarTema[0].id;
+    const awal = data.current || daftarSimpan[0] || null;
+    if (awal && Array.isArray(awal.baris) && awal.baris.length) {
+      if (daftarTema.some((t) => t.id === awal.tema)) temaDipilih = awal.tema;
+      barisSekarang = awal.baris;
+      sudahDisimpan = adaDiDaftar(barisSekarang);
+      tampilTeks(barisSekarang);
+      buatTombolTema();
+    } else {
+      tampilKosong();
+    }
+  } catch (e) {
+    console.error(e);
+    tampilKosong();
+    setStatus("Server tidak bisa dihubungi.", "salah");
+  }
+  perbaruiTombol();
+  gambarDaftar();
+})();
+</script>
+</body>
+</html>
